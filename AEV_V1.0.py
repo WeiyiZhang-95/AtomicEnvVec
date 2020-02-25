@@ -20,6 +20,8 @@ _ifWeightBySinTheta0_ = False
 
 ###This code only works while 2*max(cutoffs) <= min(periods)
 
+###Angle calc are weighted by exp() function about distance of atoms as default
+
 file_name = 'min10051'
 
 def findBox(file_name):
