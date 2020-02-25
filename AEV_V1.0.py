@@ -20,29 +20,50 @@ _ifWeightBySinTheta0_ = False
 
 ###This code only works while 2*max(cutoffs) <= min(periods)
 
-with open('min10051','r') as f:
-    lines = f.readlines()
+file_name = 'min10051'
 
-atoms = [line.split() for line in lines[26:]]
-lines.clear()
-df = pd.DataFrame(atoms)
-df.columns = ["idx", "type", "x", "y","z"]
+def findBox(file_name):
+    with open(file_name,'r') as f:
+        lines = f.readlines()
+    box = []
+    for line in lines:
+        if line[-3:-1] == 'hi':
+            box.append(line)
+        if box!=[] and line[-3:-1]!='hi':
+            break
+    for i in range(3):
+        box[i] = [float(e) for e in box[i].split()[:2]]
+    box = np.array(box)
+    box = box[:,1]-box[:,0]
+    return box
+box = findBox(file_name)
 
-df['idx'] = [int(e) for e in df['idx']]
-df['type'] = [int(e) for e in df['type']]
-df['x'] = [float(e) for e in df['x']]
-df['y'] = [float(e) for e in df['y']]
-df['z'] = [float(e) for e in df['z']]
+def readAtoms(file_name):
+    with open(file_name,'r') as f:
+        lines = f.readlines()
+    while lines[0][0].isdigit() or ('Atoms' not in lines[0] and 'atoms' not in lines[0]):
+        lines.pop(0)
+    lines.pop(0)
+    new = []
+    for line in lines:
+        if line[0].isdigit():
+            new.append(line)
+        elif len(line.split()) == 0:
+            continue
+        else:
+            break
+    atoms = [e.split() for e in new]
+    df = pd.DataFrame(atoms)
+    df.columns = ["idx", "type", "x", "y","z"]
+    df['idx'] = [int(e) for e in df['idx']]
+    df['type'] = [int(e) for e in df['type']]
+    df['x'] = [float(e) for e in df['x']]
+    df['y'] = [float(e) for e in df['y']]
+    df['z'] = [float(e) for e in df['z']]
+    return df
+df = readAtoms('min10051')
 positions = df[['x','y','z']].to_numpy()
 
-
-box = ['3.1781394890167824e+00 4.9274350212712889e+01 xlo xhi\n',
- '3.1781394890167824e+00 4.9274350212712889e+01 ylo yhi\n',
- '3.1781394890167824e+00 4.9274350212712889e+01 zlo zhi\n']
-for i in range(3):
-    box[i] = [float(e) for e in box[i].split()[:2]]
-box = np.array(box)
-box = box[:,1]-box[:,0]
 
 def distance(p1,p2=[0,0,0]):
     t = np.array(p1)-np.array(p2)
